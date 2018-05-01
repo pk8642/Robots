@@ -3,6 +3,7 @@ package gui;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
@@ -20,8 +21,13 @@ public class GameWindow extends JInternalFrame
         pack();
     }
 
-    
+    void addObstacle(Obstacle o){
+        m_visualizer.robot.obstacles.add(o);
+    }
 
+    ArrayList<Obstacle> getObstacles(){
+        return m_visualizer.robot.obstacles;
+    }
 
     void addObs(RobotCoordWindow window){//добавление наблюдателей
         m_visualizer.robot.observable.add(window);
@@ -39,21 +45,26 @@ public class GameWindow extends JInternalFrame
         m_visualizer.robot.observable.remove(window);
     }
 
-    Point getRobotPosition(){
-        return new Point(m_visualizer.robot.m_robotPositionX,m_visualizer.robot.m_robotPositionY);
+    double getRobotX(){
+        return m_visualizer.robot.m_robotPositionX;
     }
 
-    int getDirection(){
+    double getRobotY(){
+        return m_visualizer.robot.m_robotPositionY;
+    }
+
+    double getDirection(){
         return m_visualizer.robot.m_robotDirection;
     }
 
-    void setDirection(int direction){
+    void setDirection(double direction){
         m_visualizer.robot.m_robotDirection = direction;
     }
 
-    void setRobotPosition(Point p){
-        m_visualizer.robot.setRobotPosition(p);
+    void setRobotPosition(double x, double y){
+        m_visualizer.robot.m_robotPositionX=x; m_visualizer.robot.m_robotPositionY=y;
     }
+
 
     Point getTargetPosition(){
         return m_visualizer.robot.getTargetPosition();

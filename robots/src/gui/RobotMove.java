@@ -8,9 +8,10 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Observer;
 import java.util.Stack;
+import java.util.Vector;
 
 public class RobotMove extends java.util.Observable {
-
+    ArrayList<Obstacle> obstacles = new ArrayList<>();
     ArrayList<Observer> observable = new ArrayList<>();
     protected volatile double m_robotPositionX;
     protected volatile double m_robotPositionY;
@@ -19,11 +20,7 @@ public class RobotMove extends java.util.Observable {
     protected volatile int m_targetPositionX;
     protected volatile int m_targetPositionY;
 
-    volatile Point start;
-    volatile Point finish;
-
     private static final double maxVelocity = 0.1;
-    private static final double maxAngularVelocity = 0.001;
 
 
     public RobotMove(){
@@ -64,7 +61,7 @@ public class RobotMove extends java.util.Observable {
     {
         double distance = distance(m_targetPositionX, m_targetPositionY,
                 m_robotPositionX, m_robotPositionY);
-        if (distance <= 1)
+        if (distance <= 0.5)
         {
             return;
         }
@@ -75,7 +72,7 @@ public class RobotMove extends java.util.Observable {
         setChanged();
         notifyObservers();
     }
-    private void moveRobot(double velocity, double duration)
+    private void moveRobot(double velocity, double duration)//шаг робота
     {
         double newX = m_robotPositionX + velocity * duration * Math.cos(m_robotDirection);
 
@@ -83,6 +80,26 @@ public class RobotMove extends java.util.Observable {
         m_robotPositionX = newX;
         m_robotPositionY = newY;
     }
+
+    /*private Point algDijkstra(){//сделать алгоритм Дейкстры
+        ArrayList<Point> track = new ArrayList<>();
+        ArrayList<Point> verticses = new ArrayList<>();
+        Point start = new Point((int) Math.round(m_robotPositionX),(int)Math.round(m_robotPositionY));
+        Point finish = new Point(m_targetPositionX,m_targetPositionY);
+
+    }
+
+    private int[][] setMatrix(){//инициализировать матрицу
+        int[][] matrix = new int[][]{};
+        for (int i = 0; i<observable.size();i++){
+            for (int j=0;j<observable.size();j++){
+
+            }
+        }
+    }*/
+
+    //сделать метод для проверки пересечения отрезков
+
 
     private static double asNormalizedRadians(double angle)
     {
@@ -97,9 +114,6 @@ public class RobotMove extends java.util.Observable {
         return angle;
     }
 
-    private void smth(){
-        Point2D point2D = new Point2D.Double();
-    }
 
     public void notifyObservers(){//обновление данных наблюдателей
         for(Observer o: observable){

@@ -2,14 +2,17 @@ package gui;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 import java.util.Random;
 
-public class Obstacle {
+public class Obstacle implements Serializable {
 
     private Point leftUp;
     private Point rightUp;
     private Point leftDown;
     private Point rightDown;
+
+    private Obstacle(){}
 
     public Obstacle(Point p) {
         leftUp = new Point(p.x-25,p.y-25);
@@ -18,17 +21,18 @@ public class Obstacle {
         rightDown = new Point(p.x+25,p.y+25);
     }
 
-    private Color randomColor(){
-        Color[] colors = new Color[]{Color.BLACK,Color.GREEN,Color.MAGENTA,Color.BLUE,Color.CYAN,Color.LIGHT_GRAY,Color.ORANGE,Color.RED,Color.YELLOW};
+    private Color randomColor(){//рандомная заливка
+        Color[] colors = new Color[]{Color.WHITE,Color.GREEN,Color.MAGENTA,Color.BLUE,Color.CYAN,Color.LIGHT_GRAY,Color.ORANGE,Color.RED,Color.YELLOW};
         Random randomColour = new Random();
         int color = randomColour.nextInt(colors.length-1 +1);
         return colors[color];
     }
 
-    void paint(Graphics g){
+    void paint(Graphics g){//рисовка робота
         g.setColor(randomColor());
-        g.fillRect(this.leftUp.x,this.leftUp.y,50,50);
-        //g.drawRect(this.leftUp.x,this.leftUp.y,50,50);
+        g.fillRect(this.leftUp.x+1,this.leftUp.y+1,49,49);
+        g.setColor(Color.BLACK);
+        g.drawRect(this.leftUp.x,this.leftUp.y,50,50);
     }
 
     boolean hasInBorder(Point p){
