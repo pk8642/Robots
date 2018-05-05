@@ -1,25 +1,64 @@
 package gui;
 
+import javafx.geometry.Bounds;
+import javafx.scene.shape.Line;
+
 import java.awt.*;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
 import java.util.Random;
 
-public class Obstacle implements Serializable {
+public class Obstacle extends Rectangle implements Serializable {
 
     private Point leftUp;
     private Point rightUp;
     private Point leftDown;
     private Point rightDown;
 
+    private int x;
+    private int y;
+    private int width;
+    private int height;
+
+    private Point anotherLeftUp;
+    private Point anotherLeftDown;
+    private Point anotherRightUp;
+    private Point anotherRightDown;
+
     private Obstacle(){}
 
-    public Obstacle(Point p) {
+   /* public Obstacle(Point p) {
         leftUp = new Point(p.x-25,p.y-25);
         leftDown = new Point(p.x+25, p.y-25);
         rightUp = new Point(p.x-25, p.y+25);
         rightDown = new Point(p.x+25,p.y+25);
-    }
+
+        super.x = leftUp.x;
+        super.y=leftUp.y;
+        super.width=50;
+        super.height=50;
+
+        anotherLeftUp = new Point(leftUp.x-10, this.leftUp.y-10);
+        anotherLeftDown = new Point(leftDown.x+10, this.leftDown.y-10);
+        anotherRightUp = new Point(this.rightUp.x-10, this.rightUp.y+10);
+        anotherRightDown = new Point(this.rightDown.x+10, this.rightDown.y+10);
+    }*/
+   public Obstacle(Point p) {
+       leftUp = new Point(p.x-25,p.y-25);
+       rightUp = new Point(p.x+25, p.y-25);
+       leftDown = new Point(p.x-25, p.y+25);
+       rightDown = new Point(p.x+25,p.y+25);
+
+       super.x = leftUp.x;
+       super.y=leftUp.y;
+       super.width=50;
+       super.height=50;
+
+       anotherLeftUp = new Point(this.leftUp.x-10, this.leftUp.y-10);
+       anotherRightUp = new Point(this.rightUp.x+10, this.rightUp.y-10);
+       anotherLeftDown = new Point(this.leftDown.x-10, this.leftDown.y+10);
+       anotherRightDown = new Point(this.rightDown.x+10, this.rightDown.y+10);
+   }
 
     private Color randomColor(){//рандомная заливка
         Color[] colors = new Color[]{Color.WHITE,Color.GREEN,Color.MAGENTA,Color.BLUE,Color.CYAN,Color.LIGHT_GRAY,Color.ORANGE,Color.RED,Color.YELLOW};
@@ -40,19 +79,42 @@ public class Obstacle implements Serializable {
                 p.x<this.rightDown.x&&p.y<this.rightDown.y);
     }
 
+
+    boolean intersect(Line line){
+        return this.intersectsLine(line.getStartX(),line.getStartY(),line.getEndX(),line.getEndY());
+    }
+
+    public Point getAnother(Point p){
+        if(p.equals(leftDown))return getAnotherLeftDown();
+        else if(p.equals(leftUp))
+            return getAnotherLeftUp();
+        else if(p.equals(rightDown))
+            return getAnotherRightDown();
+        else return getAnotherRightUp();
+    }
+
+    public Point getAnotherLeftUp(){return anotherLeftUp;}
+
+    public Point getAnotherLeftDown(){return anotherLeftDown;}
+
+    public Point getAnotherRightUp(){return anotherRightUp;}
+
+    public Point getAnotherRightDown(){return anotherRightDown;}
+
+
     public Point getLeftUp() {
-        return leftUp;
+        return this.leftUp;
     }
 
     public Point getRightUp() {
-        return rightUp;
+        return this.rightUp;
     }
 
     public Point getLeftDown() {
-        return leftDown;
+        return this.leftDown;
     }
 
     public Point getRightDown() {
-        return rightDown;
+        return this.rightDown;
     }
 }
