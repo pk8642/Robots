@@ -13,8 +13,6 @@ import javax.swing.JPanel;
 public class GameVisualizer extends JPanel
 {
     private final Timer m_timer = initTimer();
-    private ArrayList<Obstacle> obstacles=new ArrayList<>();
-    private int drawnObstacles;
     private static Timer initTimer() 
     {
         Timer timer = new Timer("events generator", true);
@@ -50,13 +48,12 @@ public class GameVisualizer extends JPanel
                     repaint();
                 }
                 if(e.getButton()==MouseEvent.BUTTON3){
-                    obstacles.add(new Obstacle(e.getPoint()));
-
+                    robot.obstacles.add(new Obstacle(e.getPoint()));
                 }
                 if (e.getButton()==MouseEvent.BUTTON2){
-                    for (Obstacle o:obstacles){
+                    for (Obstacle o:robot.obstacles){
                         if (o.hasInBorder(e.getPoint())){
-                            obstacles.remove(o);
+                            robot.obstacles.remove(o);
                         }
                     }
                 }
@@ -82,8 +79,9 @@ public class GameVisualizer extends JPanel
         Graphics2D g2d = (Graphics2D)g; 
         drawRobot(g2d, round(robot.m_robotPositionX), round(robot.m_robotPositionY), robot.m_robotDirection);
         drawTarget(g2d, robot.m_targetPositionX, robot.m_targetPositionY);
-        for(int i=0; i<obstacles.size(); i++){
-            obstacles.get(i).paint(g2d);
+        g.drawLine((int)robot.m_robotPositionX,(int)robot.m_robotPositionY,robot.m_targetPositionX,robot.m_targetPositionY);
+        for(int i=0; i<robot.obstacles.size(); i++){
+            robot.obstacles.get(i).paint(g2d);
         }
     }
     

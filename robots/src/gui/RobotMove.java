@@ -135,7 +135,10 @@ public class RobotMove extends java.util.Observable {
             track.add(t);
         }
         Collections.reverse(track);
-        track.remove(track.get(0));
+        if (track.size()==2)
+            return finish;
+        else if(track.size()>2)
+            track.remove(track.get(0));
         finish = track.get(0);
         return finish;
 
@@ -168,7 +171,6 @@ public class RobotMove extends java.util.Observable {
                 Point secondNear = o.getAnother(points.get(1));
                 Point thirdNear = o.getAnother(points.get(2));
                 Point fourthNear = o.getAnother(points.get(3));
-
 
                 //отсортировать по близости к начальной точке
                 if(!o.intersect(new Line(start.x,start.y,firstNear.x,firstNear.y)))
