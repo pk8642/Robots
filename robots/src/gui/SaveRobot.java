@@ -4,20 +4,23 @@ import java.awt.*;
 import java.io.Serializable;
 
 public class SaveRobot implements Serializable {
-    Point position;
+    double x;
+    double y;
     Point aim;
-    int orientation;
+    double orientation;
 
     private SaveRobot(){}
 
-    public SaveRobot(Point position, Point aim, int orientation){
-        this.position = position;
+    public SaveRobot(int x, int y, Point aim, double orientation){
+        this.x = x;
+        this.y = y;
         this.aim = aim;
         this.orientation = orientation;
     }
 
     public SaveRobot(GameWindow gameWindow){
-        this.position = gameWindow.getRobotPosition();
+        this.x = gameWindow.getRobotX();
+        this.y = gameWindow.getRobotY();
         this.aim = gameWindow.getTargetPosition();
         this.orientation = gameWindow.getDirection();
     }
