@@ -107,8 +107,6 @@ public class RobotMove extends java.util.Observable {
 
         setDistanceArray(start, finish);
         for (Point p : verticses) {
-            if (map.get(start).contains(finish))
-                return finish;
             if (map.get(start).contains(p)||p.equals(start)) {//инициализация
                 distance[p.x][p.y] = distance(start.x, start.y, p.x, p.y);
                 prev[p.x][p.y]=start;
@@ -172,12 +170,15 @@ public class RobotMove extends java.util.Observable {
                 Point fourthNear = o.getAnother(points.get(3));
 
 
-                //addingToMap(o,firstNear);
                 //отсортировать по близости к начальной точке
-                setDistanceArray(start, firstNear);
-                setDistanceArray(start, secondNear);
-                setDistanceArray(thirdNear, finish);
-                setDistanceArray(fourthNear, finish);
+                if(!o.intersect(new Line(start.x,start.y,firstNear.x,firstNear.y)))
+                    setDistanceArray(start, firstNear);
+                if (!o.intersect(new Line(start.x,start.y,secondNear.x,secondNear.y)))
+                    setDistanceArray(start, secondNear);
+                if (!o.intersect(new Line(thirdNear.x,thirdNear.y,finish.x,finish.y)))
+                    setDistanceArray(thirdNear, finish);
+                if (!o.intersect(new Line(fourthNear.x,fourthNear.y,finish.x,finish.y)))
+                    setDistanceArray(fourthNear, finish);
                 //разбить на 2 части, взяв точку деления как препятсвие
                 setDistanceArray(firstNear, thirdNear);
                 setDistanceArray(secondNear, fourthNear);
@@ -188,7 +189,10 @@ public class RobotMove extends java.util.Observable {
                 map.put(start, new ArrayList<>());
             ArrayList<Point> list = map.get(start);
             list.add(finish);
-
+            if (!map.containsKey(finish))
+                map.put(finish, new ArrayList<>());
+            list = map.get(finish);
+            list.add(start);
         }
     }
 
@@ -230,9 +234,9 @@ public class RobotMove extends java.util.Observable {
         int middle = (i + j) / 2;
         while (i < j) {//разделение на группу элементов, меньших выбранного и больших его
             double centre = values.get(middle);//выбранный элемент, находящийся изначально по центру
-            while (values.get(i) < centre && i < middle)//выбирается элемент слева, который меньше centre
+            while (values.get(i) <= centre && i < middle)//выбирается элемент слева, который меньше centre
                 i++;
-            while (values.get(j) > centre && j > middle)//выбирается элемент справа, который больше centre
+            while (values.get(j) >= centre && j > middle)//выбирается элемент справа, который больше centre
                 j--;
             //вот здесь как раз играет на пользу неизменяемость порядка листа ключей и листа значений относительно мапы
             Collections.swap(values, i, j);//выбранные элементы в значениях меняются местами, образуя часть меньшую centre и большую его
