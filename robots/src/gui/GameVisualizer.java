@@ -5,6 +5,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -43,20 +44,24 @@ public class GameVisualizer extends JPanel
             @Override
             public void mouseClicked(MouseEvent e)
             {
-                if (e.getButton()==MouseEvent.BUTTON1) {
-                    robot.setTargetPosition(e.getPoint());
-                    repaint();
-                }
-                if(e.getButton()==MouseEvent.BUTTON3){
-                    robot.obstacles.add(new Obstacle(e.getPoint()));
-                }
-                if (e.getButton()==MouseEvent.BUTTON2){
-                    for (Obstacle o:robot.obstacles){
-                        if (o.hasInBorder(e.getPoint())){
-                            robot.obstacles.remove(o);
+
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        robot.setTargetPosition(e.getPoint());
+                        repaint();
+                    }
+                    if (e.getButton() == MouseEvent.BUTTON3) {
+                        robot.obstacles.add(new Obstacle(e.getPoint()));
+                    }
+                    if (e.getButton() == MouseEvent.BUTTON2) {
+                        Iterator iterator = robot.obstacles.iterator();//чтобы избежать ConcurrentModificationException
+                        while (iterator.hasNext()){
+                            Obstacle o = (Obstacle) iterator.next();
+                            if (o.hasInBorder(e.getPoint())) {
+                                iterator.remove();
+                            }
                         }
                     }
-                }
+
             }
         });
                 setDoubleBuffered(true);
