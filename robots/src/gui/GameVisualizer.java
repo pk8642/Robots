@@ -42,8 +42,7 @@ public class GameVisualizer extends JPanel
         addMouseListener(new MouseAdapter()
         {
             @Override
-            public void mouseClicked(MouseEvent e)
-            {
+            public void mouseClicked(MouseEvent e) {
 
                     if (e.getButton() == MouseEvent.BUTTON1) {
                         robot.setTargetPosition(e.getPoint());
@@ -56,7 +55,7 @@ public class GameVisualizer extends JPanel
                         Iterator iterator = robot.obstacles.iterator();//чтобы избежать ConcurrentModificationException
                         while (iterator.hasNext()){
                             Obstacle o = (Obstacle) iterator.next();
-                            if (o.hasInBorder(e.getPoint())) {
+                            if (o.contains(e.getPoint())) {
                                 iterator.remove();
                             }
                         }

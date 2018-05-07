@@ -24,26 +24,8 @@ public class Obstacle extends Rectangle implements Serializable {
     private Point anotherLeftDown;
     private Point anotherRightUp;
     private Point anotherRightDown;
-
     private Obstacle(){}
-
-   /* public Obstacle(Point p) {
-        leftUp = new Point(p.x-25,p.y-25);
-        leftDown = new Point(p.x+25, p.y-25);
-        rightUp = new Point(p.x-25, p.y+25);
-        rightDown = new Point(p.x+25,p.y+25);
-
-        super.x = leftUp.x;
-        super.y=leftUp.y;
-        super.width=50;
-        super.height=50;
-
-        anotherLeftUp = new Point(leftUp.x-10, this.leftUp.y-10);
-        anotherLeftDown = new Point(leftDown.x+10, this.leftDown.y-10);
-        anotherRightUp = new Point(this.rightUp.x-10, this.rightUp.y+10);
-        anotherRightDown = new Point(this.rightDown.x+10, this.rightDown.y+10);
-    }*/
-   public Obstacle(Point p) {
+    public Obstacle(Point p) {
        leftUp = new Point(p.x-25,p.y-25);
        rightUp = new Point(p.x+25, p.y-25);
        leftDown = new Point(p.x-25, p.y+25);
@@ -54,11 +36,11 @@ public class Obstacle extends Rectangle implements Serializable {
        super.width=50;
        super.height=50;
 
-       anotherLeftUp = new Point(this.leftUp.x-10, this.leftUp.y-10);
-       anotherRightUp = new Point(this.rightUp.x+10, this.rightUp.y-10);
-       anotherLeftDown = new Point(this.leftDown.x-10, this.leftDown.y+10);
-       anotherRightDown = new Point(this.rightDown.x+10, this.rightDown.y+10);
-   }
+       anotherLeftUp = new Point(this.leftUp.x-2, this.leftUp.y-2);//точки графа(использовал немного отступающие в поле точки от вершины)
+       anotherRightUp = new Point(this.rightUp.x+2, this.rightUp.y-2);
+       anotherLeftDown = new Point(this.leftDown.x-2, this.leftDown.y+2);
+       anotherRightDown = new Point(this.rightDown.x+2, this.rightDown.y+2);
+    }
 
     private Color randomColor(){//рандомная заливка
         Color[] colors = new Color[]{Color.WHITE,Color.GREEN,Color.MAGENTA,Color.BLUE,Color.CYAN,Color.LIGHT_GRAY,Color.ORANGE,Color.RED,Color.YELLOW};
@@ -74,17 +56,11 @@ public class Obstacle extends Rectangle implements Serializable {
         g.drawRect(this.leftUp.x,this.leftUp.y,50,50);
     }
 
-    boolean hasInBorder(Point p){
-        return  (p.x>this.leftUp.x&&p.y>this.leftUp.y&&
-                p.x<this.rightDown.x&&p.y<this.rightDown.y);
-    }
-
-
-    boolean intersect(Line line){
+    boolean intersect(Line line){//проверка на пересечение
         return this.intersectsLine(line.getStartX(),line.getStartY(),line.getEndX(),line.getEndY());
     }
 
-    public Point getAnother(Point p){
+    public Point getAnother(Point p){//получение точки графа по вершине фигуры
         if(p.equals(leftDown))return getAnotherLeftDown();
         else if(p.equals(leftUp))
             return getAnotherLeftUp();

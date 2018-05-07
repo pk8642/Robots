@@ -62,7 +62,7 @@ public class GameWindow extends JInternalFrame
     }
 
     void setRobotPosition(double x, double y){
-        m_visualizer.robot.m_robotPositionX=x; m_visualizer.robot.m_robotPositionY=y;
+        m_visualizer.robot.m_robotPositionX= x; m_visualizer.robot.m_robotPositionY= y;
     }
 
 
