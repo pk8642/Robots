@@ -3,13 +3,15 @@ package gui;
 import javafx.scene.shape.Line;
 
 import java.awt.*;
+import java.awt.geom.Line2D;
 import java.util.*;
 
 public class RobotMove extends java.util.Observable {
 
     private volatile Map<Point, ArrayList<Point>> map = new HashMap<>();
-    private volatile double[][] distance;
+    private volatile Map<Point,Double> distance;
     volatile ArrayList<Obstacle> obstacles = new ArrayList<>();
+    volatile ArrayList<Obstacle> removeObstacles = new ArrayList<>();
     volatile ArrayList<Observer> observable = new ArrayList<>();
     volatile double m_robotPositionX;
     volatile double m_robotPositionY;
@@ -59,6 +61,8 @@ public class RobotMove extends java.util.Observable {
             return;
         }
         double velocity = maxVelocity;
+
+
         Point newTarget = algDijkstra();//новая цель - ближайшая точка, почситаная по алгоритму Дейкстры
         m_robotDirection = angleTo(m_robotPositionX, m_robotPositionY, newTarget.x, newTarget.y);
         moveRobot(velocity, 10);
@@ -76,26 +80,27 @@ public class RobotMove extends java.util.Observable {
 
     private Point algDijkstra() {
         map = new HashMap<>();//коллекция ключей-вершин и значений-списков вершин, до которых они могут дойти
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        distance = new double[screenSize.height][screenSize.width];//размер экрана, чтобы индексация работала по всему экрану
-        Point[][] prev = new Point[screenSize.height][screenSize.width];//список предыдущих, по которому восстановится маршрут
+        distance = new HashMap<>();//дистанция от стартовой точки до всех
+        HashMap<Point,Point> prev = new HashMap<>();//список предыдущих, по которому восстановится маршрут
         ArrayList<Point> track = new ArrayList<>();//маршрут
         ArrayList<Point> vertices = new ArrayList<>();//множество вершин
         Point finish = new Point(m_targetPositionX, m_targetPositionY);//конечная точка
         Point start = new Point((int) Math.round(m_robotPositionX), (int) Math.round(m_robotPositionY));//стартовая точка
         vertices.add(finish);
-        for (Obstacle o : obstacles) {
+        for (int i =0;i<obstacles.size();i++) {
             ArrayList<Point> list = new ArrayList<>();
+            Obstacle o=obstacles.get(i);
             list.add(o.getLeftUp());//добавляю все точки препятствий
             list.add(o.getLeftDown());
             list.add(o.getRightDown());
             list.add(o.getRightUp());
             for (Point vertex : list) {//для каждой точки препятствия
                 Point anotherVertex = o.getAnother(vertex);
-                if (distance(m_robotPositionX, m_robotPositionY, vertex.x, vertex.y) <= 1.5)//чтобы робот случайно не зацепил угол фигуры
+                if (distance(m_robotPositionX, m_robotPositionY, vertex.x, vertex.y) <= 2)//чтобы робот случайно не зацепил угол фигуры
                     return anotherVertex;
                 vertices.add(anotherVertex);
-                for (Obstacle o2 : obstacles) {//построение графа со всеми вершинами препятствий
+                for (int j=0;j<obstacles.size();j++) {//построение графа со всеми вершинами препятствий
+                    Obstacle o2 = obstacles.get(j);
                     mappingLines(anotherVertex, o2.getAnotherLeftDown());
                     mappingLines(anotherVertex, o2.getAnotherRightDown());
                     mappingLines(anotherVertex, o2.getAnotherRightUp());
@@ -105,8 +110,6 @@ public class RobotMove extends java.util.Observable {
                     return start;
                 mappingLines(start, anotherVertex);//достроение графа точкой старта и финиша
                 mappingLines(anotherVertex, finish);
-
-
             }
         }
         if (obstacles.isEmpty()) {
@@ -116,9 +119,10 @@ public class RobotMove extends java.util.Observable {
         for (Point p : vertices) {
             if (map.get(start).contains(p)) {//инициализация
                 map.get(p).remove(start);
-                distance[p.x][p.y] = distance(m_robotPositionX, m_robotPositionY, p.x, p.y);
-                prev[p.x][p.y] = start;
-            } else distance[p.x][p.y] = 1000000;
+                distance.put(p,distance(m_robotPositionX, m_robotPositionY, p.x, p.y));
+                prev.put(p,start);//старт - перед p
+            }
+            else distance.put(p,1000000.0);
         }
         map.remove(finish);
         int n = vertices.size();//количество вершин
@@ -128,17 +132,23 @@ public class RobotMove extends java.util.Observable {
             if (!map.containsKey(w))
                 continue;
             for (Point v : map.get(w)) {//высчитывание кратчайшего расстояния
-                if (distance[w.x][w.y] + distance(w.x, w.y, v.x, v.y) < distance[v.x][v.y]) {
-                    distance[v.x][v.y] = distance[w.x][w.y] + distance(w.x, w.y, v.x, v.y);
-                    prev[v.x][v.y] = w;
+                if (distance.containsKey(v)) {
+                    if (distance.get(w) + distance(w.x, w.y, v.x, v.y) < distance.get(v)) {
+                        distance.put(v, distance.get(w) + distance(w.x, w.y, v.x, v.y));
+                        prev.put(v, w);
+                    }
+                } else {
+                    distance.put(v, distance.get(w) + distance(w.x, w.y, v.x, v.y));
+                    prev.put(v, w);
                 }
+
             }
         }
         try {//возврат ближайшей точки
             Point t = finish;
             track.add(t);
             while (!(t.equals(start))) {
-                t = prev[t.x][t.y];
+                t = prev.get(t);
                 track.add(t);
             }
             if (track.size() == 2)//если вершины 2, то это старт и финиш
@@ -158,8 +168,9 @@ public class RobotMove extends java.util.Observable {
         boolean intersection=false;
         if (p1.equals(p2))
             return;
-        for (Obstacle obstacle : obstacles) {
-            if (obstacle.intersect(new Line(p1.x, p1.y, p2.x, p2.y))) {
+        for (int i = 0; i<obstacles.size();i++) {//чтобы избежать ConcurrentModificationException//чет не работает
+            Obstacle obstacle = obstacles.get(i);
+            if (obstacle.intersect(new Line2D.Double(p1.x, p1.y, p2.x, p2.y))) {
                 intersection = true;
                 break;
             }
@@ -195,9 +206,10 @@ public class RobotMove extends java.util.Observable {
     private Point minV(ArrayList<Point> list) {//наименьшее значение из данных
         Point min = list.get(0);
         for (Point p : list) {
-            if (distance[p.x][p.y] < distance[min.x][min.y])
-                min = p;
-        }
+            if (distance.containsKey(p)&&distance.containsKey(min))
+                if (distance.get(p) < distance.get(min))
+                    min = p;
+            }
         return min;
     }
 }

@@ -1,6 +1,8 @@
 package gui;
 
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -22,48 +24,36 @@ public class GameVisualizer extends JPanel
 
     RobotMove robot = new RobotMove();
 
-    public GameVisualizer(){
-        m_timer.schedule(new TimerTask()
-        {
+    public GameVisualizer() {
+        m_timer.schedule(new TimerTask() {
             @Override
-            public void run()
-            {
+            public void run() {
                 onRedrawEvent();
             }
         }, 0, 50);
-        m_timer.schedule(new TimerTask()
-        {
+        m_timer.schedule(new TimerTask() {
             @Override
-            public void run()
-            {
+            public void run() {
                 robot.onModelUpdateEvent();
             }
         }, 0, 10);
-        addMouseListener(new MouseAdapter()
-        {
+        addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
 
-                    if (e.getButton() == MouseEvent.BUTTON1) {
-                        robot.setTargetPosition(e.getPoint());
-                        repaint();
-                    }
-                    if (e.getButton() == MouseEvent.BUTTON3) {
-                        robot.obstacles.add(new Obstacle(e.getPoint()));
-                    }
-                    if (e.getButton() == MouseEvent.BUTTON2) {
-                        Iterator iterator = robot.obstacles.iterator();//чтобы избежать ConcurrentModificationException
-                        while (iterator.hasNext()){
-                            Obstacle o = (Obstacle) iterator.next();
-                            if (o.contains(e.getPoint())) {
-                                iterator.remove();
-                            }
-                        }
-                    }
-
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    robot.setTargetPosition(e.getPoint());
+                    repaint();
+                }
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    robot.obstacles.add(new Obstacle(e.getPoint()));
+                }
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    robot.obstacles.removeIf(obstacle -> obstacle.contains(e.getPoint()));
+                }
             }
         });
-                setDoubleBuffered(true);
+        setDoubleBuffered(true);
     }
 
     protected void onRedrawEvent()
@@ -85,7 +75,7 @@ public class GameVisualizer extends JPanel
         drawTarget(g2d, robot.m_targetPositionX, robot.m_targetPositionY);
         g.drawLine((int)robot.m_robotPositionX,(int)robot.m_robotPositionY,robot.m_targetPositionX,robot.m_targetPositionY);
         for(int i=0; i<robot.obstacles.size(); i++){
-            robot.obstacles.get(i).paint(g2d);
+                robot.obstacles.get(i).paint(g2d);
         }
     }
     
