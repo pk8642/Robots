@@ -1,15 +1,10 @@
 package gui;
 
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 import javax.swing.JPanel;
 
@@ -75,8 +70,22 @@ public class GameVisualizer extends JPanel
         drawTarget(g2d, robot.m_targetPositionX, robot.m_targetPositionY);
         g.drawLine((int)robot.m_robotPositionX,(int)robot.m_robotPositionY,robot.m_targetPositionX,robot.m_targetPositionY);
         for(int i=0; i<robot.obstacles.size(); i++){
-                robot.obstacles.get(i).paint(g2d);
+                drawObstacle(robot.obstacles.get(i),g2d);
         }
+    }
+
+    private void drawObstacle(Obstacle obstacle,Graphics g){//рисовка робота
+        g.setColor(randomColor());
+        g.fillRect(obstacle.getLeftUp().x+1,obstacle.getLeftUp().y+1,99,49);
+        g.setColor(Color.BLACK);
+        g.drawRect(obstacle.getLeftUp().x,obstacle.getLeftUp().y,100,50);
+    }
+
+    private Color randomColor(){//рандомная заливка
+        Color[] colors = new Color[]{Color.WHITE,Color.GREEN,Color.MAGENTA,Color.BLUE,Color.CYAN,Color.LIGHT_GRAY,Color.ORANGE,Color.RED,Color.YELLOW};
+        Random randomColour = new Random();
+        int color = randomColour.nextInt(colors.length-1 +1);
+        return colors[color];
     }
     
     private static void fillOval(Graphics g, int centerX, int centerY, int diam1, int diam2)
