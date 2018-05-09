@@ -1,7 +1,5 @@
 package gui;
 
-import javafx.scene.shape.Line;
-
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.util.*;
@@ -11,7 +9,6 @@ public class RobotMove extends java.util.Observable {
     private volatile Map<Point, ArrayList<Point>> map = new HashMap<>();
     private volatile Map<Point,Double> distance;
     volatile ArrayList<Obstacle> obstacles = new ArrayList<>();
-    volatile ArrayList<Obstacle> removeObstacles = new ArrayList<>();
     volatile ArrayList<Observer> observable = new ArrayList<>();
     volatile double m_robotPositionX;
     volatile double m_robotPositionY;
@@ -99,7 +96,7 @@ public class RobotMove extends java.util.Observable {
                 if (distance(m_robotPositionX, m_robotPositionY, vertex.x, vertex.y) <= 2)//чтобы робот случайно не зацепил угол фигуры
                     return anotherVertex;
                 vertices.add(anotherVertex);
-                for (int j=0;j<obstacles.size();j++) {//построение графа со всеми вершинами препятствий
+                for (int j=i;j<obstacles.size();j++) {//построение графа со всеми вершинами препятствий
                     Obstacle o2 = obstacles.get(j);
                     mappingLines(anotherVertex, o2.getAnotherLeftDown());
                     mappingLines(anotherVertex, o2.getAnotherRightDown());
@@ -168,7 +165,7 @@ public class RobotMove extends java.util.Observable {
         boolean intersection=false;
         if (p1.equals(p2))
             return;
-        for (int i = 0; i<obstacles.size();i++) {//чтобы избежать ConcurrentModificationException//чет не работает
+        for (int i = 0; i<obstacles.size();i++) {
             Obstacle obstacle = obstacles.get(i);
             if (obstacle.intersect(new Line2D.Double(p1.x, p1.y, p2.x, p2.y))) {
                 intersection = true;

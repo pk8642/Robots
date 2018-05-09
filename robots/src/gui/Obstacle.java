@@ -1,12 +1,8 @@
 package gui;
 
-import javafx.geometry.Bounds;
-import javafx.scene.shape.Line;
-
 import java.awt.*;
 import java.awt.geom.Line2D;
 import java.io.Serializable;
-import java.util.Random;
 
 public class Obstacle extends Rectangle implements Serializable {
 
@@ -39,19 +35,7 @@ public class Obstacle extends Rectangle implements Serializable {
         anotherRightDown = new Point(this.rightDown.x+2, this.rightDown.y+2);
     }
 
-    private Color randomColor(){//рандомная заливка
-        Color[] colors = new Color[]{Color.WHITE,Color.GREEN,Color.MAGENTA,Color.BLUE,Color.CYAN,Color.LIGHT_GRAY,Color.ORANGE,Color.RED,Color.YELLOW};
-        Random randomColour = new Random();
-        int color = randomColour.nextInt(colors.length-1 +1);
-        return colors[color];
-    }
 
-    void paint(Graphics g){//рисовка робота
-        g.setColor(randomColor());
-        g.fillRect(this.leftUp.x+1,this.leftUp.y+1,99,49);
-        g.setColor(Color.BLACK);
-        g.drawRect(this.leftUp.x,this.leftUp.y,100,50);
-    }
 
     boolean intersect(Line2D line){//проверка на пересечение
         //Line2D line2D = new Line2D.Double(line.getStartX(),line.getStartY(),line.getEndX(),line.getEndY());
