@@ -61,8 +61,12 @@ public class RobotMove extends java.util.Observable {
 
 
         Point newTarget = algDijkstra();//новая цель - ближайшая точка, почситаная по алгоритму Дейкстры
-        m_robotDirection = angleTo(m_robotPositionX, m_robotPositionY, newTarget.x, newTarget.y);
-        moveRobot(velocity, 10);
+        if (!newTarget.equals(new Point((int)Math.round(m_robotPositionX),(int)Math.round(m_robotPositionY)))) {
+            //если полученная точка равна точке start из метода algDijkstra, то не двигать
+            m_robotDirection = angleTo(m_robotPositionX, m_robotPositionY, newTarget.x, newTarget.y);
+            moveRobot(velocity, 10);
+        }
+
         setChanged();
         notifyObservers();
     }
