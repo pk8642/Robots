@@ -5,8 +5,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.*;
+import java.util.Timer;
 
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class GameVisualizer extends JPanel
 {
@@ -17,38 +18,62 @@ public class GameVisualizer extends JPanel
         return timer;
     }
 
+
     RobotMove robot = new RobotMove();
+    ArrayList<RobotMove> robots = new ArrayList<>();
 
     public GameVisualizer() {
+        robots.add(robot);
+
         m_timer.schedule(new TimerTask() {
             @Override
             public void run() {
                 onRedrawEvent();
             }
         }, 0, 50);
-        m_timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                robot.onModelUpdateEvent();
-            }
-        }, 0, 10);
+            m_timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    for (int i = 0;i<robots.size();i++) {
+                        robots.get(i).onModelUpdateEvent();
+                    }
+                }
+            }, 0, 10);
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
                 if (e.getButton() == MouseEvent.BUTTON1) {
-                    robot.setTargetPosition(e.getPoint());
-                    repaint();
+                    for (int i = 0;i<robots.size();i++) {
+                        robots.get(i).setTargetPosition(e.getPoint());
+                        repaint();
+                    }
                 }
-                if (e.getButton() == MouseEvent.BUTTON3) {
-                    robot.obstacles.add(new Obstacle(e.getPoint()));
+                else if (e.getButton() == MouseEvent.BUTTON3) {
+                    for (int i = 0;i<robots.size();i++) {
+                        robots.get(i).obstacles.add(new Obstacle(e.getPoint()));
+                    }
                 }
-                if (e.getButton() == MouseEvent.BUTTON2) {
-                    robot.obstacles.removeIf(obstacle -> obstacle.contains(e.getPoint()));
+                else if (e.getButton() == MouseEvent.BUTTON2) {
+                    for (int i = 0; i < robots.size(); i++) {
+                        robots.get(i).obstacles.removeIf(obstacle -> obstacle.contains(e.getPoint()));
+                    }
                 }
             }
         });
         setDoubleBuffered(true);
+    }
+
+    void addRobot() {
+        LoadClass lc = new LoadClass("C:\\Users\\skalo\\Desktop\\Java\\Robots-master\\robots\\out\\production\\Robots-master\\algs");
+        String[] choices = new String[lc.classes.size()];
+        choices = lc.classes.keySet().toArray(choices);
+        String in = (String) JOptionPane.showInputDialog(null, "Выберите алгоритм", "Выбор алгоритма", JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+        if (in != null) {
+            RobotMove robotMove = new RobotMove();
+            robotMove.cls = lc.classes.get(in);
+            robots.add(robotMove);
+            robotMove.obstacles = robot.obstacles;
+        }
     }
 
     protected void onRedrawEvent()
@@ -62,32 +87,28 @@ public class GameVisualizer extends JPanel
     }
     
     @Override
-    public void paint(Graphics g)
-    {
+    public void paint(Graphics g) {
         super.paint(g);
-        Graphics2D g2d = (Graphics2D)g; 
-        drawRobot(g2d, round(robot.m_robotPositionX), round(robot.m_robotPositionY), robot.m_robotDirection);
-        drawTarget(g2d, robot.m_targetPositionX, robot.m_targetPositionY);
-        g.drawLine((int)robot.m_robotPositionX,(int)robot.m_robotPositionY,robot.m_targetPositionX,robot.m_targetPositionY);
-        for(int i=0; i<robot.obstacles.size(); i++){
-                drawObstacle(robot.obstacles.get(i),g2d);
+        for (int k = 0;k<robots.size();k++) {
+        Graphics2D g2d = (Graphics2D) g;
+            RobotMove robotMove = robots.get(k);
+            drawRobot(g2d, round(robotMove.m_robotPositionX), round(robotMove.m_robotPositionY), robotMove.m_robotDirection);
+            drawTarget(g2d, robotMove.m_targetPositionX, robotMove.m_targetPositionY);
+            g.drawLine((int) robotMove.m_robotPositionX, (int) robotMove.m_robotPositionY, robotMove.m_targetPositionX, robotMove.m_targetPositionY);
+
+            for (int i = 0; i < robotMove.obstacles.size(); i++) {
+                drawObstacle(robotMove.obstacles.get(i), g2d);
+            }
         }
     }
 
     private void drawObstacle(Obstacle obstacle,Graphics g){//рисовка робота
-        g.setColor(randomColor());
+        g.setColor(Color.blue);
         g.fillRect(obstacle.getLeftUp().x+1,obstacle.getLeftUp().y+1,99,49);
         g.setColor(Color.BLACK);
         g.drawRect(obstacle.getLeftUp().x,obstacle.getLeftUp().y,100,50);
     }
 
-    private Color randomColor(){//рандомная заливка
-        Color[] colors = new Color[]{Color.WHITE,Color.GREEN,Color.MAGENTA,Color.BLUE,Color.CYAN,Color.LIGHT_GRAY,Color.ORANGE,Color.RED,Color.YELLOW};
-        Random randomColour = new Random();
-        int color = randomColour.nextInt(colors.length-1 +1);
-        return colors[color];
-    }
-    
     private static void fillOval(Graphics g, int centerX, int centerY, int diam1, int diam2)
     {
         g.fillOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
@@ -100,8 +121,8 @@ public class GameVisualizer extends JPanel
     
     private void drawRobot(Graphics2D g, int x, int y, double direction)
     {
-        int robotCenterX = round(robot.m_robotPositionX);
-        int robotCenterY = round(robot.m_robotPositionY);
+        int robotCenterX =x;
+        int robotCenterY =y;
         AffineTransform t = AffineTransform.getRotateInstance(direction, robotCenterX, robotCenterY); 
         g.setTransform(t);
         g.setColor(Color.MAGENTA);

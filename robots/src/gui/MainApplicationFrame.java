@@ -46,6 +46,7 @@ public class MainApplicationFrame extends JFrame
             ObjectInputStream pos = new ObjectInputStream(new BufferedInputStream(new FileInputStream(ROBOTPOSITION)));
             ObjectInputStream win = new ObjectInputStream(new BufferedInputStream(new FileInputStream(WINDOWDATA)));
             ObjectInputStream obst = new ObjectInputStream(new BufferedInputStream(new FileInputStream(OBSTACLE)));
+            int robots = pos.read();
             syncWindows = win.read();
             int windows = win.read();
             for (int i = 0; i < syncWindows; i++) {//добавление всех свзяных окон
@@ -54,8 +55,12 @@ public class MainApplicationFrame extends JFrame
                 RobotCoordWindow coordWindow = createCoordWin((SaveWindow) win.readObject());//окно координат
                 gameWindow.addObs(coordWindow);//привязка окна координат к игровому
 
-                setRobotPosition(gameWindow, (SaveRobot) pos.readObject());//восстановление позиций робота
-                coordWindow.setText("x: " + gameWindow.getRobotX() + "\r\ny: " + gameWindow.getRobotY());
+                gameWindow.addRobots(robots);
+                for (int k=0;k<robots;k++) {
+                    setRobotPosition(gameWindow, (SaveRobot) pos.readObject(),k);//восстановление позиций робота
+                }
+                    coordWindow.setText(gameWindow.getCoords());
+
 
                 countObstacles = obst.read();//восстановление препятствий
                 for (int o = 0;o<countObstacles;o++){
@@ -73,8 +78,10 @@ public class MainApplicationFrame extends JFrame
                         break;
                     case 'g':
                         GameWindow gameWindow = createGameWindow(window);//создание окна игры
-
-                        setRobotPosition(gameWindow, (SaveRobot) pos.readObject());//восстановление позиций робота
+                        gameWindow.addRobots(robots);
+                        for (int k=0;k<robots;k++) {
+                            setRobotPosition(gameWindow, (SaveRobot) pos.readObject(),k);//восстановление позиций робота
+                        }
 
                         countObstacles = obst.read();//восстановление препятствий
                         for (int o = 0;o<countObstacles;o++){
@@ -120,10 +127,10 @@ public class MainApplicationFrame extends JFrame
         addWindowListener(getClosingAdapter());
     }
 
-    private void setRobotPosition(GameWindow gameWindow, SaveRobot robot){
-        gameWindow.setRobotPosition(robot.x,robot.y);//позиция робота
-        gameWindow.setTargetPosition(robot.aim);//позиция цели
-        gameWindow.setDirection(robot.orientation);//ориентация робота
+    private void setRobotPosition(GameWindow gameWindow, SaveRobot robot, int i){
+        gameWindow.setRobotPosition(robot.x,robot.y,i);//позиция робота
+        gameWindow.setTargetPosition(robot.aim,i);//позиция цели
+        gameWindow.setDirection(robot.orientation,i);//ориентация робота
     }
 
     private LogWindow createLogWindow(){
@@ -194,9 +201,12 @@ public class MainApplicationFrame extends JFrame
             ObjectOutputStream robotStream =new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(ROBOTPOSITION)));
             ObjectOutputStream obstacleStream = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(OBSTACLE)));
             for (GameWindow g:gameWindows){
-                robotStream.writeObject(new SaveRobot(g));//сохранение роботов
+                ArrayList<RobotMove> robots=g.getRobots();
+                robotStream.write(robots.size());
+                for (RobotMove robotMove:robots) {
+                    robotStream.writeObject(new SaveRobot(robotMove));//сохранение роботов
+                }
                 robotStream.flush();
-
                 ArrayList<Obstacle> list = g.getObstacles();//сохранение препятствий
                 obstacleStream.write(list.size());
                 for (Obstacle o:list){
@@ -209,7 +219,6 @@ public class MainApplicationFrame extends JFrame
             e.printStackTrace();
         }
     }
-
 
 
     private ArrayList<SaveWindow> readWindows() {//считывание окошек
@@ -327,7 +336,6 @@ public class MainApplicationFrame extends JFrame
         testMenu.getAccessibleContext().setAccessibleDescription(
                 "Тестовые команды");
         return testMenu;
-
     }
 
     private JMenu generateOther(){
